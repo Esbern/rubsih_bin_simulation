@@ -28,3 +28,40 @@ mqtt:
 
   # Topic defaults (projects can change these)
   base_topic: "simulated-city"
+
+
+# Optional: rubbish-bin simulation configuration.
+#
+# If you omit this section, the template still works (config + MQTT helpers).
+simulation:
+  # One timestep = 15 minutes (as documented in README.md)
+  timestep_minutes: 15
+
+  # Optional: fixed simulation start time (UTC) for deterministic logs/plots.
+  # If omitted, the simulator uses the current wall-clock time.
+  # start_time: "2026-02-18T00:00:00Z"
+
+  # Per-location, per-timestep arrival probability
+  arrival_prob: 0.25
+
+  # Each deposited bag increases fill by this many percentage points
+  bag_fill_delta_pct: 2
+
+  # Publish status when crossing each N% boundary (10 -> 10%, 20%, 30%, ...)
+  status_boundary_pct: 10
+
+  # Optional: emit a status event on every deposit (more frequent logs/graphs)
+  # publish_every_deposit: true
+
+  # Optional: wall-clock delay between timesteps (useful for MQTT testing)
+  step_delay_s: 0.1
+
+  # Optional: set to a fixed integer to make runs reproducible
+  # seed: 123
+
+  # List of simulation locations (WGS84 / lat-lon)
+  locations:
+    # Copenhagen City Hall (approx.)
+    - id: "city_hall"
+      lat: 55.67597
+      lon: 12.56984

@@ -11,11 +11,11 @@ Collection/emptying is **out of scope for now** (not implemented yet). The short
 - The simulation supports **multiple locations**.
 - Each location has a user-provided coordinate: **latitude/longitude (WGS84 / EPSG:4326)**.
 
-### Containers◊
+### Containers
 
 Each location has three containers:
 
-- `left`◊
+- `left`
 - `center`
 - `right`
 
@@ -67,6 +67,57 @@ Suggested payload fields:
 Suggested topic convention (can be adjusted later):
 
 - `simulated-city/bins/{location_id}/{container}/status`
+
+## Dashboard
+
+The project includes a small Streamlit dashboard that can show fill graphs and alerts.
+
+### Install dashboard dependencies
+
+```bash
+pip install -e ".[dashboard]"
+```
+
+### Run dashboard (log file mode)
+
+Generate a JSONL log file (the file is overwritten per run):
+
+```bash
+python -m simulated_city --steps 500 --dry-run --log-file sim_status.jsonl
+```
+
+Run the dashboard:
+
+```bash
+streamlit run scripts/dashboard/bin_dashboard.py
+```
+
+Then select **Log file** in the sidebar and set the path to `sim_status.jsonl`.
+
+Tip: if you want more frequent points for graphs, set `simulation.publish_every_deposit: true` in `config.yaml`.
+
+### Run dashboard (MQTT mode)
+
+1. Set credentials (HiveMQ Cloud) in `.env`:
+
+```bash
+# edit .env and set:
+# HIVEMQ_USERNAME=...
+# HIVEMQ_PASSWORD=...
+```
+
+2. Run the simulator (publishes retained status to MQTT):
+
+```bash
+python -m simulated_city --steps 200
+```
+
+3. Run the dashboard and select **MQTT** in the sidebar:
+
+```bash
+streamlit run scripts/dashboard/bin_dashboard.py
+```
+
 
 ## Coding constraints
 

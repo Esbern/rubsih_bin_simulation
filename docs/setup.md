@@ -1,6 +1,5 @@
 # Setup
 
-This project targets **Python 3.11**.
 This project targets **Python 3.11+**.
 
 ## Create and activate a virtual environment
@@ -25,6 +24,14 @@ python -m pip install -U pip
 
 ```bash
 pip install -e ".[dev,notebooks]"
+```
+
+## Optional: dashboard (Streamlit)
+
+To run the dashboard in `scripts/dashboard/`:
+
+```bash
+pip install -e ".[dashboard]"
 ```
 
 ## Optional: geospatial transforms (CRS)

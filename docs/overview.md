@@ -41,3 +41,7 @@ Workshop docs:
 - `docs/setup.md` — environment setup + optional extras
 - `docs/demos.md` — script demos (same ideas as the notebook)
 - `docs/exercises.md` — student exercises (build the simulation)
+
+Dashboard:
+
+- `scripts/dashboard/bin_dashboard.py` — Streamlit dashboard (MQTT or JSONL log file)

@@ -18,7 +18,9 @@ If imports fail, install the library first:
 
 from __future__ import annotations
 
+import argparse
 import time
+
 from simulated_city.config import load_config
 from simulated_city.mqtt import connect_mqtt, topic
 
@@ -26,8 +28,23 @@ from simulated_city.mqtt import connect_mqtt, topic
 def main() -> None:
     cfg = load_config()
 
-    # Subscribe to the same topic as the publisher demo
-    subscribe_topic = topic(cfg.mqtt, "events/demo")
+    parser = argparse.ArgumentParser(description="MQTT subscribe demo")
+    parser.add_argument(
+        "--topic",
+        default=None,
+        help="Topic filter to subscribe to (default: events/demo).",
+    )
+    parser.add_argument(
+        "--bins",
+        action="store_true",
+        help="Subscribe to bin status topics (base_topic/bins/+/+/status).",
+    )
+    args = parser.parse_args()
+
+    if args.bins:
+        subscribe_topic = f"{cfg.mqtt.base_topic}/bins/+/+/status"
+    else:
+        subscribe_topic = topic(cfg.mqtt, args.topic or "events/demo")
 
     print("MQTT broker:", f"{cfg.mqtt.host}:{cfg.mqtt.port}", "tls=", cfg.mqtt.tls)
     print("Base topic:", cfg.mqtt.base_topic)

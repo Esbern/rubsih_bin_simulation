@@ -49,18 +49,52 @@ def connect_mqtt(cfg: MqttConfig, *, client_id_suffix: str | None = None, timeou
         context = ssl.create_default_context()
         client.tls_set_context(context)
 
-    # Connect (blocking) with a simple timeout.
+    # Connect (TCP) with a simple timeout.
     started = time.time()
     last_err: Exception | None = None
     while time.time() - started < timeout_s:
         try:
             client.connect(cfg.host, cfg.port, keepalive=cfg.keepalive_s)
-            return MqttClientHandle(client=client)
+            break
         except (OSError, socket.gaierror, ssl.SSLError) as e:
             last_err = e
             time.sleep(0.25)
 
-    raise TimeoutError(f"Failed to connect to MQTT broker {cfg.host}:{cfg.port} within {timeout_s}s") from last_err
+    if time.time() - started >= timeout_s:
+        raise TimeoutError(f"Failed to connect to MQTT broker {cfg.host}:{cfg.port} within {timeout_s}s") from last_err
+
+    # Verify MQTT CONNACK (this is where auth/ACL errors show up). The paho
+    # client won't process CONNACK until a network loop is running.
+    connected = threading.Event()
+    connect_err: list[str] = []
+
+    def on_connect(_client, _userdata, _connect_flags, reason_code, _properties):
+        try:
+            code = getattr(reason_code, "value", reason_code)
+            code_int = int(code)
+        except Exception:
+            code_int = -1
+
+        if code_int != 0:
+            connect_err.append(f"CONNACK reason_code={reason_code}")
+        connected.set()
+
+    client.on_connect = on_connect
+    client.loop_start()
+    try:
+        if not connected.wait(timeout_s):
+            raise TimeoutError(f"Timed out waiting for MQTT CONNACK from {cfg.host}:{cfg.port}")
+        if connect_err:
+            msg = (
+                "MQTT connection was rejected by the broker (likely auth/ACL). "
+                f"Details: {connect_err[0]}. "
+                "If you're using HiveMQ Cloud, ensure HIVEMQ_USERNAME and HIVEMQ_PASSWORD are set (e.g. in .env)."
+            )
+            raise ConnectionError(msg)
+    finally:
+        client.loop_stop()
+
+    return MqttClientHandle(client=client)
 
 
 @dataclass(frozen=True, slots=True)

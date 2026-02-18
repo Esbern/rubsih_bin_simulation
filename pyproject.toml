@@ -30,6 +30,10 @@ notebooks = [
   "matplotlib>=3.8",
   "folium>=0.15",
 ]
+dashboard = [
+  "streamlit>=1.31",
+  "pandas>=2.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
