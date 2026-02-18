@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_3b8ef9dcf9008bbf34f6684c52c0d47f {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_3b8ef9dcf9008bbf34f6684c52c0d47f" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_3b8ef9dcf9008bbf34f6684c52c0d47f = L.map(
+                "map_3b8ef9dcf9008bbf34f6684c52c0d47f",
+                {
+                    center: [55.6761, 12.5683],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 18,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_b4e9423c1a957730171a075981a66f1e = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_b4e9423c1a957730171a075981a66f1e.addTo(map_3b8ef9dcf9008bbf34f6684c52c0d47f);
+        
+    
+            var marker_dc634e0224063907369051401fb85979 = L.marker(
+                [55.6761, 12.5683],
+                {
+}
+            ).addTo(map_3b8ef9dcf9008bbf34f6684c52c0d47f);
+        
+    
+        var popup_9e32996e8796b347f59aa84c1931aa77 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_25c8e5f632d8fa6914629a470e87d514 = $(`<div id="html_25c8e5f632d8fa6914629a470e87d514" style="width: 100.0%; height: 100.0%;">EPSG:25832 (m): E=724351.93, N=6175804.02</div>`)[0];
+                popup_9e32996e8796b347f59aa84c1931aa77.setContent(html_25c8e5f632d8fa6914629a470e87d514);
+            
+        
+
+        marker_dc634e0224063907369051401fb85979.bindPopup(popup_9e32996e8796b347f59aa84c1931aa77)
+        ;
+
+        
+    
+    
+            marker_dc634e0224063907369051401fb85979.bindTooltip(
+                `<div>
+                     Copenhagen City Hall (approx)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+</script>
+</html>

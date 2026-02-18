@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simulated-city-template"
+version = "0.1.0"
+description = "Workshop template for agent-based programming in Python (simulated city / urban digital twin starter)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Workshop" }]
+
+dependencies = [
+  "paho-mqtt>=2.1",
+  "PyYAML>=6.0",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+]
+geo = [
+  "pyproj>=3.6",
+]
+notebooks = [
+  "jupyterlab>=4",
+  "ipykernel>=6",
+  "matplotlib>=3.8",
+  "folium>=0.15",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["src"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
