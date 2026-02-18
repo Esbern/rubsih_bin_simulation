@@ -1,59 +1,92 @@
-# simulated-city-template
+# Rubbish Bin Simulation (Copenhagen)
 
-Template project for a workshop where students learn **agent-based programming in Python** by building parts of a **simulated city / urban digital twin**.
+This project simulates **household waste containers** being filled over time at one or more locations in Copenhagen.
 
-## Quickstart (Python 3.11)
+Collection/emptying is **out of scope for now** (not implemented yet). The short-term goal is to publish container status so a dashboard can monitor fill levels.
 
-**Linux / macOS:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -U pip
-pip install -e ".[dev,notebooks]"
-python -m pytest
-python -m jupyterlab
-```
+## Simulation model (current spec)
 
-**Windows (PowerShell):**
-```powershell
-python3 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -U pip
-pip install -e ".[dev,notebooks]"
-python -m pytest
-python -m jupyterlab
-```
+### Locations
 
-*Note for Windows: If you get an execution policy error, run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` first.*
+- The simulation supports **multiple locations**.
+- Each location has a user-provided coordinate: **latitude/longitude (WGS84 / EPSG:4326)**.
 
-## Repo layout
+### Containers◊
 
-- `docs/`: workshop notes and exercises
-- `src/simulated_city/`: installable library code
-- `notebooks/`: workshop notebooks
-- `tests/`: small sanity tests
+Each location has three containers:
 
-## MQTT (default)
+- `left`◊
+- `center`
+- `right`
 
-- Default broker settings live in `config.yaml` (HiveMQ-style)
-- MQTT helper module: `simulated_city.mqtt`
-- Setup notes: `docs/mqtt.md`
-- **Credentials:** 
-  1. Copy `.env.example` to `.env`
-  2. Edit `.env` and enter your MQTT broker username and password
-  - Example: `MQTT_USERNAME=your_username` and `MQTT_PASSWORD=your_password`
+Container state is modeled as:
 
-## Geo / CRS transforms (optional)
+- `fill_pct` (0–100)
+- A container is **full** when `fill_pct == 100`.
 
-- Geo helper module: `simulated_city.geo`
-- Provides CRS transforms (including WGS84 (EPSG:4326) ↔ EPSG:25832 helpers)
-- Install extra: `pip install -e ".[geo]"` (see `docs/setup.md`)
+### Time
 
-## First run (CLI smoke)
+- The simulation advances in discrete steps.
+- **One timestep = 15 minutes.**
 
-```bash
-python -m simulated_city
-```
+### Arrivals and deposits
 
-Note: this template library intentionally ships only `simulated_city.config` and
-`simulated_city.mqtt` (plus optional `simulated_city.geo`). The simulation itself is an exercise.
+For each timestep:
+
+- With probability **25%**, a person arrives to deposit a waste bag.
+- Each deposited bag increases the chosen container by **2 percentage points** (`+2 fill_pct`).
+
+### Choice of container
+
+When a person arrives:
+
+- They choose `center` with probability **50%**.
+- They choose `left` with probability **25%**.
+- They choose `right` with probability **25%**.
+
+If the chosen container is full, the person chooses among the remaining non-full containers.
+
+If **all** containers at that location are full, the simulation should record an “unable to deposit” event (exact behavior TBD).
+
+## MQTT outputs (target)
+
+The code should use the existing MQTT utilities in `src/simulated_city/mqtt.py`.
+
+Goal: publish a **status update each time a container crosses a 10% boundary** ("status for each 10 pct").
+
+Suggested payload fields:
+
+- `ts`: ISO-8601 timestamp
+- `location_id`: stable identifier for the location
+- `lat`, `lon`: location coordinate
+- `container`: `left|center|right`
+- `fill_pct`: integer 0–100
+- `timestep_index`: integer step counter
+- `event`: e.g. `status` or `deposit`
+
+Suggested topic convention (can be adjusted later):
+
+- `simulated-city/bins/{location_id}/{container}/status`
+
+## Coding constraints
+
+- Follow the guidelines in [copilot-instructions.md](copilot-instructions.md).
+- Keep the code readable and easy to extend.
+- Support more than one location.
+
+## Realism improvements (ideas)
+
+If you want the simulation to feel more like real life, the highest-value additions are:
+
+- **Time-of-day patterns**: arrival probability varies by hour/day (weekday vs weekend).
+- **Bag size distribution**: use a distribution (e.g., small/medium/large) instead of constant `+2%`.
+- **Different locations behave differently**: residential vs commercial areas, events, seasonality.
+- **Overflow behavior**: if all bins are full, model littering/illegal dumping or people walking to another location.
+- **Sensor realism**: noisy measurements, delayed reporting, missing MQTT messages.
+- **Container capacity differences**: per-container size, compaction, or different waste fractions.
+
+Later (when emptying is in scope):
+
+- **Collection schedules** (fixed days/times) or **threshold-based dispatch**.
+- **Truck routing** between multiple locations using real distances (geo transforms already exist in `src/simulated_city/geo.py`).
+ 
