@@ -10,7 +10,7 @@ Template project for a workshop where students learn **agent-based programming i
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
-pip install -e ".[dev,notebooks]"
+python -m pip install -e ".[dev,notebooks]"
 python -m pytest
 python -m jupyterlab
 ```
@@ -21,7 +21,7 @@ python -m jupyterlab
 python3 -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -U pip
-pip install -e ".[dev,notebooks]"
+python -m pip install -e ".[dev,notebooks]"
 python -m pytest
 python -m jupyterlab
 ```
@@ -49,7 +49,7 @@ python -m jupyterlab
 
 - Geo helper module: `simulated_city.geo`
 - Provides CRS transforms (including WGS84 (EPSG:4326) ↔ EPSG:25832 helpers)
-- Install extra: `pip install -e ".[geo]"` (see `docs/setup.md`)
+- Install extra: `python -m pip install -e ".[geo]"` (see `docs/setup.md`)
 
 ## First run (CLI smoke)
 

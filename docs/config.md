@@ -13,7 +13,7 @@ It returns a single `AppConfig` object that contains `MqttConfig`.
 The base install already includes config support:
 
 ```bash
-pip install -e "."
+python -m pip install -e "."
 ```
 
 

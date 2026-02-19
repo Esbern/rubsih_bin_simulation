@@ -8,7 +8,7 @@ It is kept optional so the template stays lightweight.
 ## Install
 
 ```bash
-pip install -e ".[geo]"
+python -m pip install -e ".[geo]"
 ```
 
 

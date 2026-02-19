@@ -25,7 +25,7 @@ The repo already has the core simulation publishing retained MQTT status message
    - Refactor dashboard MQTT connection to use `connect_mqtt` and topic helpers in [src/simulated_city/mqtt.py](src/simulated_city/mqtt.py) rather than hand-rolling the paho client (keeps TLS/credentials consistent with [src/simulated_city/config.py](src/simulated_city/config.py)).
 
 6. Documentation touch-up for running the dashboard  
-   - Add a short “Dashboard” section to either [README.md](README.md) or [docs/demos.md](docs/demos.md) with: `pip install -e ".[dashboard]"`, how to run Streamlit from repo root, and example commands to generate MQTT or a replayable log (`python -m simulated_city --steps ... --log-file ...`).
+   - Add a short “Dashboard” section to either [README.md](README.md) or [docs/demos.md](docs/demos.md) with: `python -m pip install -e ".[dashboard]"`, how to run Streamlit from repo root, and example commands to generate MQTT or a replayable log (`python -m simulated_city --steps ... --log-file ...`).
 
 **Verification**
 - Unit tests: `python -m pytest -q`

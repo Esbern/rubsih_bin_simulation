@@ -75,7 +75,7 @@ The project includes a small Streamlit dashboard that can show fill graphs and a
 ### Install dashboard dependencies
 
 ```bash
-pip install -e ".[dashboard]"
+python -m pip install -e ".[dashboard]"
 ```
 
 ### Run dashboard (log file mode)

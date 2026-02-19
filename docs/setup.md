@@ -23,7 +23,7 @@ python -m pip install -U pip
 ## Install the library (editable) + workshop tools
 
 ```bash
-pip install -e ".[dev,notebooks]"
+python -m pip install -e ".[dev,notebooks]"
 ```
 
 ## Optional: dashboard (Streamlit)
@@ -31,7 +31,7 @@ pip install -e ".[dev,notebooks]"
 To run the dashboard in `scripts/dashboard/`:
 
 ```bash
-pip install -e ".[dashboard]"
+python -m pip install -e ".[dashboard]"
 ```
 
 ## Optional: geospatial transforms (CRS)
@@ -43,13 +43,13 @@ Geo helpers live in `simulated_city.geo` and include convenience functions like
 `wgs2utm(...)` / `utm2wgs(...)` plus the general `transform_xy(...)`.
 
 ```bash
-pip install -e ".[geo]"
+python -m pip install -e ".[geo]"
 ```
 
 Tip: for notebooks that include both mapping + CRS transforms, you can install both extras:
 
 ```bash
-pip install -e ".[notebooks,geo]"
+python -m pip install -e ".[notebooks,geo]"
 ```
 
 ## Run notebooks

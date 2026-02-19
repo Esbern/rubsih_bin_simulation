@@ -16,7 +16,6 @@ Run:
 - streamlit run scripts/dashboard/bin_dashboard.py
 """
 
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import json
 import queue
@@ -30,47 +29,7 @@ import streamlit as st
 import altair as alt
 
 from simulated_city.config import load_config
-
-
-@dataclass(frozen=True, slots=True)
-class StatusEvent:
-    ts: datetime
-    location_id: str
-    container: str
-    fill_pct: int
-    timestep_index: int
-    event: str
-
-
-def _parse_ts(value: Any) -> datetime:
-    if isinstance(value, datetime):
-        return value.astimezone(timezone.utc)
-    if not isinstance(value, str):
-        raise ValueError("ts must be a string")
-
-    # We emit timestamps like 2026-02-18T18:26:17.155154Z
-    if value.endswith("Z"):
-        value = value[:-1] + "+00:00"
-    return datetime.fromisoformat(value).astimezone(timezone.utc)
-
-
-def _event_from_payload(payload: dict[str, Any]) -> StatusEvent:
-    ts = _parse_ts(payload["ts"])
-    location_id = str(payload["location_id"])
-    container = str(payload["container"])
-    fill_pct = int(payload["fill_pct"])
-    timestep_index = int(payload.get("timestep_index") if payload.get("timestep_index") is not None else 0)
-    event = str(payload.get("event") or "status")
-    return StatusEvent(
-        ts=ts,
-        location_id=location_id,
-        container=container,
-        fill_pct=fill_pct,
-        timestep_index=timestep_index,
-        event=event,
-    )
-
-
+from simulated_city.dashboard_data import event_from_payload, events_to_frame, read_jsonl_incremental
 def _drain_queue(q: queue.Queue[dict[str, Any]], max_items: int = 5_000) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for _ in range(max_items):
@@ -79,31 +38,6 @@ def _drain_queue(q: queue.Queue[dict[str, Any]], max_items: int = 5_000) -> list
         except queue.Empty:
             break
     return items
-
-
-def _series_key(location_id: str, container: str) -> str:
-    return f"{location_id}.{container}"
-
-
-def _events_to_frame(events: list[StatusEvent]) -> pd.DataFrame:
-    if not events:
-        return pd.DataFrame(columns=["ts", "series", "fill_pct", "timestep_index", "event"])
-
-    rows = [
-        {
-            "ts": e.ts,
-            "series": _series_key(e.location_id, e.container),
-            "fill_pct": e.fill_pct,
-            "timestep_index": e.timestep_index,
-            "event": e.event,
-        }
-        for e in events
-    ]
-    df = pd.DataFrame(rows)
-    df["ts"] = pd.to_datetime(df["ts"], utc=True)
-    return df
-
-
 @st.cache_resource
 def _start_mqtt_listener(topic_filter: str) -> queue.Queue[dict[str, Any]]:
     """Start a background MQTT subscriber that pushes payload dicts into a queue."""
@@ -152,31 +86,6 @@ def _start_mqtt_listener(topic_filter: str) -> queue.Queue[dict[str, Any]]:
     t.start()
 
     return q
-
-
-def _read_jsonl_incremental(path: str, offset: int) -> tuple[list[dict[str, Any]], int]:
-    """Read new JSONL lines from `path` starting at byte offset."""
-
-    with open(path, "r", encoding="utf-8") as f:
-        f.seek(offset)
-        new_lines = f.readlines()
-        new_offset = f.tell()
-
-    payloads: list[dict[str, Any]] = []
-    for line in new_lines:
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            obj = json.loads(line)
-            if isinstance(obj, dict) and "payload" in obj and isinstance(obj["payload"], dict):
-                payloads.append(obj["payload"])
-        except Exception:
-            continue
-
-    return payloads, new_offset
-
-
 def main() -> None:
     st.set_page_config(page_title="Rubbish Bin Dashboard", layout="wide")
 
@@ -224,21 +133,21 @@ def main() -> None:
         if "log_offset" not in st.session_state:
             st.session_state["log_offset"] = 0
         try:
-            payloads, new_offset = _read_jsonl_incremental(log_path, int(st.session_state["log_offset"]))
+            payloads, new_offset = read_jsonl_incremental(log_path, int(st.session_state["log_offset"]))
             st.session_state["log_offset"] = new_offset
             new_payloads = payloads
         except FileNotFoundError:
             st.warning(f"Log file not found: {log_path}")
 
-    new_events: list[StatusEvent] = []
+    new_events = []
     for payload in new_payloads:
         try:
-            new_events.append(_event_from_payload(payload))
+            new_events.append(event_from_payload(payload))
         except Exception:
             continue
 
     if new_events:
-        new_df = _events_to_frame(new_events)
+        new_df = events_to_frame(new_events)
         combined = pd.concat([st.session_state["events_df"], new_df], ignore_index=True)
         combined = combined.sort_values(["ts", "series"], kind="mergesort")
         combined = combined.drop_duplicates(subset=["ts", "series", "fill_pct", "event"], keep="last")

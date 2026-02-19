@@ -22,7 +22,7 @@ source .venv/bin/activate
 Then install the library (editable):
 
 ```bash
-pip install -e "."
+python -m pip install -e "."
 ```
 
 Then run a demo:
@@ -50,9 +50,9 @@ python scripts/demo/03_folium_map_city_hall.py
 - `02_geo_crs_transforms.py`
   - shows WGS84 (EPSG:4326) ↔ EPSG:25832
   - shows both `transform_xy(...)` and `wgs2utm(...)` / `utm2wgs(...)`
-  - requires: `pip install -e ".[geo]"`
+  - requires: `python -m pip install -e ".[geo]"`
 
 - `03_folium_map_city_hall.py`
   - builds a Folium map in WGS84 (no transforms)
   - saves `copenhagen_city_hall_map.html`
-  - requires: `pip install -e ".[notebooks]"` (or `pip install folium`)
+  - requires: `python -m pip install -e ".[notebooks]"` (or `python -m pip install folium`)

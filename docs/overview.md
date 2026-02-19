@@ -22,7 +22,7 @@ The goal is to keep the code:
 - `simulated_city.config`: load settings from `config.yaml` + optional `.env`
 - `simulated_city.mqtt`: build topics, connect, and publish MQTT messages
 - `simulated_city.geo` (optional): CRS transforms for real-world coordinates
-  - Enable with: `pip install -e ".[geo]"`
+  - Enable with: `python -m pip install -e ".[geo]"`
   - Includes beginner-friendly helpers like `wgs2utm(...)` / `utm2wgs(...)`
 
 
