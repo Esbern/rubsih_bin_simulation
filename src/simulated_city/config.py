@@ -83,7 +83,7 @@ def load_config(path: str | Path = "config.yaml") -> AppConfig:
 
     resolved_path = _resolve_default_config_path(path)
     data = _load_yaml_dict(resolved_path)
-    mqtt = data.get("mqtt") or {}
+    mqtt = _select_mqtt_config(data)
     simulation = data.get("simulation")
 
     host = str(mqtt.get("host") or "localhost")
@@ -114,6 +114,63 @@ def load_config(path: str | Path = "config.yaml") -> AppConfig:
         ),
         simulation=sim_cfg,
     )
+
+
+def _select_mqtt_config(data: dict[str, Any]) -> dict[str, Any]:
+    """Return the effective MQTT config mapping.
+
+    Supported YAML shapes:
+
+    1) Legacy (single broker):
+       mqtt: {host, port, tls, ...}
+
+    2) Profile-based:
+       mqtt:
+         profile: local
+         profiles:
+           local: {host, port, tls, ...}
+           other: {...}
+
+    The active profile can also be selected via env var:
+    - SIMCITY_MQTT_PROFILE (preferred)
+    - MQTT_PROFILE (fallback)
+    """
+
+    raw = data.get("mqtt") or {}
+    if not isinstance(raw, dict):
+        raise ValueError("Config key 'mqtt' must be a mapping")
+
+    profiles = raw.get("profiles")
+    if profiles is None:
+        return raw
+    if not isinstance(profiles, dict):
+        raise ValueError("Config key 'mqtt.profiles' must be a mapping")
+
+    env_profile = os.getenv("SIMCITY_MQTT_PROFILE") or os.getenv("MQTT_PROFILE")
+    profile_name = env_profile or raw.get("profile") or raw.get("active_profile") or raw.get("default_profile")
+
+    if not profile_name:
+        # Sensible default: prefer a profile named 'local' if present.
+        profile_name = "local" if "local" in profiles else next(iter(profiles.keys()), None)
+
+    if not profile_name:
+        raise ValueError("Config key 'mqtt.profiles' is empty; define at least one profile")
+
+    if profile_name not in profiles:
+        available = ", ".join(sorted(str(k) for k in profiles.keys()))
+        raise ValueError(f"Unknown MQTT profile '{profile_name}'. Available: {available}")
+
+    selected = profiles.get(profile_name) or {}
+    if not isinstance(selected, dict):
+        raise ValueError(f"Config key 'mqtt.profiles.{profile_name}' must be a mapping")
+
+    # Merge: common mqtt settings first, then profile overrides.
+    common: dict[str, Any] = {
+        k: v
+        for k, v in raw.items()
+        if k not in {"profiles", "profile", "active_profile", "default_profile"}
+    }
+    return {**common, **selected}
 
 
 def _parse_simulation_config(raw: Any) -> SimulationConfig | None:

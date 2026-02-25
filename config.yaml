@@ -4,23 +4,42 @@
 # For other brokers: edit the mqtt.* fields (or create a separate config and load it).
 
 mqtt:
-  # HiveMQ Cloud is a common default.
-  # Replace with your cluster host, e.g. "xxxxxx.s1.eu.hivemq.cloud".
-  host: "c451c402b7fb41b399936cd5727a1d3f.s1.eu.hivemq.cloud"
+  # Switch broker by changing this value, or set:
+  #   SIMCITY_MQTT_PROFILE=local
+  #   SIMCITY_MQTT_PROFILE=mqtthq
+  profile: local
 
-  # For HiveMQ Cloud TLS MQTT the port is commonly 8883.
-  port: 8883
+  # Broker profiles.
+  # Profile values override any common mqtt.* settings below.
+  profiles:
+    # Local broker (your Windows Mosquitto service)
+    local:
+      host: "127.0.0.1"
+      port: 1883
+      tls: false
 
-  # Use TLS for cloud brokers.
-  tls: true
+    # Public broker example for the MQTT HQ app.
+    # If you use a different host/port in MQTT HQ, set them here.
+    mqtthq:
+      host: "broker.mqttdashboard.com"
+      port: 1883
+      tls: false
+
+    # Existing default (HiveMQ Cloud-style).
+    # Replace host with your cluster host, e.g. "xxxxxx.s1.eu.hivemq.cloud".
+    hivemq_cloud:
+      host: "c451c402b7fb41b399936cd5727a1d3f.s1.eu.hivemq.cloud"
+      port: 8883
+      tls: true
+      username_env: "HIVEMQ_USERNAME"
+      password_env: "HIVEMQ_PASSWORD"
 
   # Optional alternative if you connect via WebSockets instead of raw MQTT.
   # websockets: false
   # websocket_path: "/mqtt"
 
-  # Use environment variables for credentials.
-  username_env: "HIVEMQ_USERNAME"
-  password_env: "HIVEMQ_PASSWORD"
+  # Credentials (optional).
+  # Tip: keep secrets in env vars, and set them per-profile above.
 
   # Client settings
   client_id_prefix: "simcity"
